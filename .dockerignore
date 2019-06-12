@@ -1,6 +1,8 @@
 .git
 .gitignore
 README.md
+.dockerignore
+Dockerfile
 
 #
 # OS X
@@ -36,3 +38,5 @@ rerun.txt
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
+
+node_modules
