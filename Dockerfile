@@ -1,4 +1,4 @@
-FROM ruby:latest
+FROM ruby:2.6.2
 ENV LANG C.UTF-8
 
 # Set up dumb-init
