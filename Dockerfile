@@ -1,13 +1,32 @@
 FROM ruby:2.6.2
 ENV LANG C.UTF-8
 
+# Enable bundling of private gems
 ARG BUNDLE_GITHUB__COM
+
+# Add package sources
+RUN   curl -sL https://deb.nodesource.com/setup_8.x | bash - \
+   && curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+   && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
+   && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+   && echo "deb https://dl.yarnpkg.com/debian/ stable main" >> /etc/apt/sources.list.d/yarn.list
+
+# Install packages
+RUN apt-get update -qq && apt-get install -y \
+    google-chrome-stable \
+    # libgconf-2-4 \
+    # libnss3 \
+    nodejs \
+    postgresql-client \
+    yarn \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Disable Chrome sandbox
+RUN sed -i 's|HERE/chrome"|HERE/chrome" --disable-setuid-sandbox --no-sandbox|g' "/opt/google/chrome/google-chrome"
 
 # Set up dumb-init
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
 RUN chmod +x /usr/local/bin/dumb-init
-
-RUN apt-get update -qq && apt-get install -y nodejs mongodb-clients && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN gem install bundler
 
@@ -17,7 +36,7 @@ RUN bundle config --global frozen 1
 # Set up working directory
 RUN mkdir /app
 
-# Set up gems
+# Set up gems TODO: yarn?
 WORKDIR /tmp
 ADD .ruby-version .ruby-version
 ADD Gemfile Gemfile
