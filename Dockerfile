@@ -34,20 +34,27 @@ RUN gem install bundler
 RUN bundle config --global frozen 1
 
 # Set up working directory
-RUN mkdir /app
+RUN mkdir -p /app/rosalind
 
-# Set up gems TODO: yarn?
+# Set up gems
 WORKDIR /tmp
 ADD .ruby-version .ruby-version
 ADD Gemfile Gemfile
 ADD Gemfile.lock Gemfile.lock
 RUN bundle install -j4
 
+# Install node modules into a directory outside of the project dir,
+# so that they can be cached
+WORKDIR /app
+ADD package.json package.json
+ADD yarn.lock yarn.lock
+RUN yarn install
+
 # Finally, add the rest of our app's code
 # (this is done at the end so that changes to our app's code
 # don't bust Docker's cache)
-ADD . /app
-WORKDIR /app
+ADD . /app/rosalind
+WORKDIR /app/rosalind
 
 # Setup Rails shared folders for Puma / Nginx
 RUN mkdir /shared
